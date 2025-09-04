@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dubai Million Dollar Homepage</title>
+  <meta name="description" content="Own a piece of the homepage. A modern, privacy-friendly pixel board inspired by the Million Dollar Homepage." />
+  <meta property="og:title" content="Dubai Million Dollar Homepage" />
+  <meta property="og:description" content="Buy 10×10 blocks on a 1000×1000 canvas. Link out to your brand forever." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0b0d10" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#D4AF37">
+  <style>
+    :root {
+      --canvas-size: 1000px;
+      --unit: 10px;
+      --bg: #0b0d10;
+      --fg: #eef2f7;
+      --muted: #a2a9b3;
+      --accent: #5cc8ff;
+      --grid-color: rgba(255,255,255,0.06);
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+      color: var(--fg);
+      background: radial-gradient(1400px 800px at 20% -10%, rgba(92,200,255,0.10), transparent 40%),
+                  radial-gradient(1200px 800px at 80% 110%, rgba(170,135,255,0.08), transparent 45%),
+                  #0b0d10;
+    }
+    a { color: inherit; }
+    .container { width: min(1200px, 94vw); margin: 0 auto; }
+    header.site { position: sticky; top: 0; z-index: 40; background: rgba(11,13,16,0.75); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .site .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; }
+    .brand { display: flex; gap: 10px; align-items: center; }
+    .logo { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #0ea5e9, #8b5cf6); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+    .brand h1 { margin: 0; font-size: clamp(18px, 3vw, 22px); letter-spacing: -0.02em; }
+    nav a { text-decoration: none; padding: 8px 10px; border-radius: 8px; }
+    nav a:hover { background: var(--card); }
+    .cta { background: #0ea5e9; color: #031018; padding: 8px 12px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+    .cta:hover { filter: brightness(1.05); }
+    .hero { padding: 40px 0 10px; }
+    .hero .lead { display: grid; gap: 10px; }
+    .hero h2 { margin: 0; font-size: clamp(26px, 5vw, 44px); letter-spacing: -0.02em; line-height: 1.02; }
+    .hero p { margin: 0; color: var(--muted); font-size: clamp(14px, 2.5vw, 16px); }
+    .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 14px 0 0; }
+    .pill { padding: 8px 12px; border: 1px solid var(--border); background: var(--card); border-radius: 999px; display: inline-flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono"; font-size: 11px; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: var(--fg); }
+    .canvas-wrap { width: min(95vw, 1000px); aspect-ratio: 1 / 1; border-radius: 16px; padding: 14px;
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(92,200,255,0.12), transparent 40%),
+                  radial-gradient(1200px 800px at 80% 100%, rgba(170,135,255,0.10), transparent 45%);
+      border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.03); display: grid; place-items: center; margin: 8px auto 20px; }
+    .board-outer { position: relative; width: var(--canvas-size); height: var(--canvas-size); transform-origin: top left; }
+    .board { position: absolute; inset: 0; background: #111; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .board.show-grid::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+      background-size: var(--unit) var(--unit); pointer-events: none; z-index: 2; }
+    .ad { position: absolute; display: block; border: 1px solid rgba(255,255,255,0.18); overflow: hidden; text-decoration: none; transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; will-change: transform; }
+    .ad:hover { transform: translateZ(0) scale(1.02); z-index: 3; box-shadow: 0 8px 24px rgba(0,0,0,0.35); filter: brightness(1.05); }
+    .ad img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ad .label { position: absolute; left: 6px; bottom: 6px; right: 6px; font-size: 11px; line-height: 1.25; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.6); opacity: 0.0; transition: opacity 120ms ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; letter-spacing: 0.2px; }
+    .ad:hover .label { opacity: 0.95; }
+    section { padding: 28px 0; border-top: 1px solid var(--border); }
+    h3 { margin: 0 0 12px; font-size: clamp(18px, 3vw, 24px); }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .calc label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .calc input[type="number"] { width: 100%; padding: 8px 10px; background: #0f1318; border: 1px solid var(--border); border-radius: 8px; color: var(--fg); }
+    .muted { color: var(--muted); }
+    footer { padding: 22px 0 40px; color: var(--muted); }
+    footer .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+    .small { font-size: 12px; }
+    .stat { font-weight: 800; font-size: 18px; }
+    ul.clean { list-style: none; padding: 0; margin: 0; }
+    ul.clean li { margin: 8px 0; }
+    .disclaimer { font-size: 12px; color: var(--muted); }
+  </style>
+  <script src="https://js.stripe.com/v3"></script>
+</head>
+<body>
+  <header class="site">
+    <div class="container row">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1 id="siteName">Dubai Million Dollar Homepage</h1>
+      </div>
+      <nav>
+        <a href="#board">Board</a>
+        <a href="#buy">Buy Pixels</a>
+        <a href="#how">How it works</a>
+        <a href="#wall">Wall of Fame</a>
+        <a href="#faq">FAQ</a>
+        <a class="cta" href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="lead">
+        <h2 id="tagline">Own a piece of the homepage.</h2>
+        <p>1000×1000 pixels. Minimum block is 10×10 (100 pixels). Link your brand forever—like the iconic Million Dollar Homepage, reimagined with accessibility and a clean modern UI.</p>
+        <div class="controls">
+          <span class="pill"><label><input id="gridToggle" type="checkbox" checked> Show grid</label></span>
+          <span class="pill">
+            <label for="zoom">Zoom</label>
+            <input id="zoom" type="range" min="20" max="100" value="80" />
+            <span id="zoomVal" class="kbd">80%</span>
+          </span>
+          <a class="cta" href="#buy">Buy Pixels</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="board" aria-label="Pixel board">
+    <div class="container">
+      <div class="canvas-wrap">
+        <div id="boardOuter" class="board-outer">
+          <div id="boardEl" class="board show-grid" role="img" aria-label="Pixel advertising board, 1000 by 1000 pixels"></div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Live Stats</h3>
+          <div><span class="muted">Total pixels:</span> <span id="statTotal" class="stat">1,000,000</span></div>
+          <div><span class="muted">Sold pixels:</span> <span id="statSold" class="stat">—</span></div>
+          <div><span class="muted">Available pixels:</span> <span id="statAvail" class="stat">—</span></div>
+          <div class="muted small">Blocks are 10×10 units = 100 pixels each.</div>
+        </div>
+        <div class="card">
+          <h3>Pricing Calculator</h3>
+          <div class="calc">
+            <label>Width (units of 10px)</label>
+            <input id="wUnits" type="number" min="1" max="100" value="10" />
+            <label>Height (units of 10px)</label>
+            <input id="hUnits" type="number" min="1" max="100" value="10" />
+            <p class="muted small">Pixels: <span id="calcPixels">100</span> • Price: <strong id="calcPrice">$100</strong></p>
+            <button id="buyNow" class="cta" type="button">Buy this size</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>About</h3>
+          <p>This is a modern homage to the Million Dollar Homepage. Each advertiser buys a colored or image tile with a link to their site. Hover to reveal the label; click to visit.</p>
+          <p class="muted small">Accessible, responsive, no trackers. Links are <code>rel="nofollow sponsored ugc"</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="container">
+      <h3>How it works</h3>
+      <div class="grid">
+        <div class="card"><strong>1) Pick a spot.</strong><br/><span class="muted">Choose width×height in 10px units and location.</span></div>
+        <div class="card"><strong>2) Send your art.</strong><br/><span class="muted">Static image (PNG/JPG/SVG) sized to your block.</span></div>
+        <div class="card"><strong>3) Add a link.</strong><br/><span class="muted">We’ll link to your brand with an optional label.</span></div>
+        <div class="card"><strong>4) Pay & publish.</strong><br/><span class="muted">Once confirmed, your tile goes live.</span></div>
+        <div class="card"><strong>5) Permanent archive.</strong><br/><span class="muted">We keep a snapshot so your ad persists.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="wall">
+    <div class="container">
+      <h3>Wall of Fame</h3>
+      <ul id="wallList" class="clean"></ul>
+    </div>
+  </section>
+
+  <section id="buy">
+    <div class="container">
+      <h3>Buy Pixels</h3>
+      <div class="grid">
+        <div class="card">
+          <p><strong>Price:</strong> <span id="pricePerPixel">$1</span> per pixel. Minimum 100 pixels (10×10 block).</p>
+          <p>Use the calculator above to estimate your block size and price. Then click <em>Buy this size</em> to pay securely.</p>
+        </div>
+        <div class="card">
+          <p><strong>Content Policy:</strong> no hate, adult content, malware, or misleading claims. We reserve the right to refuse or remove ads that violate these rules.</p>
+          <p class="disclaimer">All trademarks and brands are property of their respective owners.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="container">
+      <h3>FAQ</h3>
+      <div class="grid">
+        <div class="card">
+          <strong>Can I change my link later?</strong>
+          <div class="muted">Yes, small edits are OK to keep the board healthy. Abuse = removal.</div>
+        </div>
+        <div class="card">
+          <strong>What image formats do you accept?</strong>
+          <div class="muted">PNG (preferred), JPG, or SVG. Size to your exact block dimensions for best results.</div>
+        </div>
+        <div class="card">
+          <strong>Is there tracking?</strong>
+          <div class="muted">No cookies or trackers. We may add optional click counts later.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container row small">
+      <div>&copy; <span id="year"></span> <span id="siteNameFoot">Dubai Million Dollar Homepage</span>. All rights reserved.</div>
+      <div>Made with vanilla HTML/CSS/JS. No frameworks, no trackers.</div>
+    </div>
+  </footer>
+
+  <script>
+    // ======= CONFIG =======
+    const CONFIG = {
+      siteName: "Dubai Million Dollar Homepage",
+      tagline: "Own a piece of the homepage.",
+      pricePerPixelUSD: 1, // $1/pixel
+    };
+
+    const UNIT = 10;
+    const CANVAS = 1000;
+
+    const DATA = [
+      { x: 0,   y: 0,   w: 10, h: 10,  href: "https://example.com/alpha",  title: "Alpha Co.",   color: "#0ea5e9", label: "Alpha Co." },
+      { x: 20,  y: 0,   w: 20, h: 10,  href: "https://example.com/beta",   title: "Beta Studio", color: "#f59e0b", label: "Beta Studio" },
+      { x: 60,  y: 0,   w: 40, h: 20,  href: "https://example.com/gamma",  title: "Gamma Tools", color: "#10b981", label: "Gamma Tools" },
+      { x: 0,   y: 40,  w: 30, h: 20,  href: "https://example.com/delta",  title: "Delta Labs",  color: "#ef4444", label: "Delta Labs" },
+      { x: 35,  y: 35,  w: 20, h: 15,  href: "https://example.com/epsilon",title: "Epsilon",     color: "#8b5cf6", label: "Epsilon" },
+      { x: 75,  y: 70,  w: 20, h: 20,  href: "https://example.com/zeta",   title: "Zeta",        color: "#06b6d4", label: "Zeta" }
+    ];
+
+    const board = document.getElementById("boardEl");
+
+    function renderBoard() {
+      board.innerHTML = "";
+      for (const ad of DATA) {
+        const el = document.createElement("a");
+        el.className = "ad";
+        el.href = ad.href || "#";
+        el.target = "_blank";
+        el.rel = "nofollow sponsored ugc noopener";
+        el.title = ad.title || "";
+        el.setAttribute("aria-label", ad.title || ad.label || "Sponsor");
+
+        const left = ad.x * UNIT;
+        const top  = ad.y * UNIT;
+        const w    = ad.w * UNIT;
+        const h    = ad.h * UNIT;
+
+        el.style.left = left + "px";
+        el.style.top = top + "px";
+        el.style.width = w + "px";
+        el.style.height = h + "px";
+
+        if (ad.img) {
+          const img = document.createElement("img");
+          img.src = ad.img;
+          img.alt = ad.title || ad.label || "";
+          el.appendChild(img);
+        } else {
+          el.style.background = ad.color || "#222";
+        }
+
+        if (ad.label) {
+          const label = document.createElement("span");
+          label.className = "label";
+          label.textContent = ad.label;
+          el.appendChild(label);
+        }
+
+        board.appendChild(el);
+      }
+    }
+
+    function fitToContainer() {
+      const wrapper = document.querySelector(".canvas-wrap");
+      const outer = document.getElementById("boardOuter");
+      const w = wrapper.clientWidth;
+      const scale = w / CANVAS;
+      outer.style.transform = `scale(${scale})`;
+      outer.style.width = CANVAS + "px";
+      outer.style.height = CANVAS + "px";
+    }
+
+    function applyZoom(percent) {
+      const wrap = document.querySelector(".canvas-wrap");
+      const max = 1000;
+      const width = Math.max(260, Math.round(max * (percent / 100)));
+      wrap.style.width = width + "px";
+      fitToContainer();
+    }
+
+    function calcStats() {
+      const pixelsPerBlock = UNIT * UNIT; // 100
+      let soldPixels = 0;
+      for (const ad of DATA) soldPixels += (ad.w * ad.h) * pixelsPerBlock;
+      const total = 1000 * 1000;
+      const avail = total - soldPixels;
+      document.getElementById("statTotal").textContent = total.toLocaleString();
+      document.getElementById("statSold").textContent = soldPixels.toLocaleString();
+      document.getElementById("statAvail").textContent = avail.toLocaleString();
+    }
+
+    function buildWallOfFame() {
+      const list = document.getElementById("wallList");
+      list.innerHTML = "";
+      DATA.forEach(ad => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = ad.href || "#"; a.target = "_blank"; a.rel = "nofollow sponsored ugc noopener";
+        a.textContent = ad.label || ad.title || ad.href || "Sponsor";
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+    }
+
+    function wireCalculator() {
+      const wI = document.getElementById("wUnits");
+      const hI = document.getElementById("hUnits");
+      const pixelsEl = document.getElementById("calcPixels");
+      const priceEl = document.getElementById("calcPrice");
+      function update() {
+        const w = Math.max(1, Math.min(100, Number(wI.value)||1));
+        const h = Math.max(1, Math.min(100, Number(hI.value)||1));
+        const pixels = w*h*UNIT*UNIT;
+        const price = pixels * CONFIG.pricePerPixelUSD;
+        pixelsEl.textContent = pixels.toLocaleString();
+        priceEl.textContent = `$${price.toLocaleString()}`;
+      }
+      wI.addEventListener("input", update);
+      hI.addEventListener("input", update);
+      update();
+    }
+
+    function applyConfig() {
+      document.getElementById("siteName").textContent = "Dubai Million Dollar Homepage";
+      document.getElementById("siteNameFoot").textContent = "Dubai Million Dollar Homepage";
+      document.getElementById("tagline").textContent = CONFIG.tagline;
+      document.title = "Dubai Million Dollar Homepage";
+      document.getElementById("year").textContent = new Date().getFullYear();
+      document.getElementById("pricePerPixel").textContent = `$${CONFIG.pricePerPixelUSD}`;
+    }
+
+    // Stripe
+    const stripe = Stripe("pk_test_replace_with_your_publishable_key"); // <-- replace in server/.env and here via env-injection if you prefer
+    async function handleBuy() {
+      const w = Math.max(1, Math.min(100, Number(document.getElementById("wUnits").value) || 1));
+      const h = Math.max(1, Math.min(100, Number(document.getElementById("hUnits").value) || 1));
+      // Optional: prompt for label/href here or use a later upload flow
+      const label = prompt("Optional: Brand Label (shown on hover)?", "Your Brand");
+      const href = prompt("Optional: Destination URL (https://...)?", "https://example.com");
+
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wUnits: w, hUnits: h, label, href })
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        alert("Error creating checkout: " + t);
+        return;
+      }
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // Redirect to Stripe Checkout
+      } else if (data.id) {
+        const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+        if (error) alert(error.message);
+      } else {
+        alert("Unexpected response from server.");
+      }
+    }
+
+    // Controls
+    const gridToggle = document.getElementById("gridToggle");
+    const zoom = document.getElementById("zoom");
+    const zoomVal = document.getElementById("zoomVal");
+    gridToggle.addEventListener("change", () => {
+      document.getElementById("boardEl").classList.toggle("show-grid", gridToggle.checked);
+    });
+    zoom.addEventListener("input", () => {
+      zoomVal.textContent = zoom.value + "%";
+      applyZoom(Number(zoom.value));
+    });
+    document.getElementById("buyNow").addEventListener("click", handleBuy);
+
+    // Init
+    renderBoard();
+    fitToContainer();
+    applyZoom(Number(zoom.value));
+    calcStats();
+    buildWallOfFame();
+    wireCalculator();
+    applyConfig();
+    window.addEventListener("resize", fitToContainer);
+  </script>
+</body>
+</html>
